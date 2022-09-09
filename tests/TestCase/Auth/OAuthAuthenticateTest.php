@@ -30,7 +30,7 @@ class OAuthAuthenticateTest extends TestCase
     public function testAuthenticate()
     {
         $request = new Request('posts/index');
-        $request->data = [];
+        $request = $request->withParsedBody([]);
         $this->assertFalse($this->auth->authenticate($request, $this->response));
     }
 }

@@ -24,4 +24,11 @@
             '_ext' => ['json']
         ]
     );
+    $routes->connect(
+        '/get-profile',
+        [
+            'controller' => 'OAuth',
+            'action' => 'getProfile'
+        ]
+    );
 });

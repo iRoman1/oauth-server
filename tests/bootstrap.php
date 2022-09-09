@@ -35,7 +35,7 @@ Configure::write('App', [
         'templates' => [ROOT . 'Template' . DS]
     ]
 ]);
-Cake\Cache\Cache::config([
+Cake\Cache\Cache::setConfig([
     '_cake_core_' => [
         'engine' => 'File',
         'prefix' => 'cake_core_',
@@ -56,7 +56,7 @@ if (!getenv('DB')) {
     putenv('DB=sqlite');
 }
 
-ConnectionManager::config('test', ['url' => getenv('db_dsn')]);
+ConnectionManager::setConfig('test', ['url' => getenv('db_dsn')]);
 
 Configure::write('OAuthServer.appController', 'TestApp\Controller\TestAppController');
 

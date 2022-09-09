@@ -1,4 +1,7 @@
-<h1><?= $authParams['client']->getName() ?> would like to access:</h1>
+<?php /**
+ * @var \Cake\View\View $this
+ */
+?><h1><?= $authParams['client']->getName() ?> would like to access:</h1>
 
 <ul>
     <?php foreach ($authParams['scopes'] as $scope): ?>
@@ -9,11 +12,11 @@
 </ul>
 <?php
 echo $this->Form->create(null);
-echo $this->Form->input('Approve', [
+echo $this->Form->control('Approve', [
     'name' => 'authorization',
     'type' => 'submit'
 ]);
-echo $this->Form->input('Deny', [
+echo $this->Form->control('Deny', [
     'name' => 'authorization',
     'type' => 'submit'
 ]);

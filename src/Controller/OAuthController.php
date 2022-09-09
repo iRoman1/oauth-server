@@ -49,10 +49,10 @@ class OAuthController extends AppController
             throw new \RuntimeException("OAuthServer requires Auth component to be loaded and properly configured");
         }
 
-        $this->Auth->allow(['oauth', 'accessToken']);
+        $this->Auth->allow(['oauth', 'accessToken', 'getProfile']);
         $this->Auth->deny(['authorize']);
 
-        if ($this->request->param('action') == 'authorize') {
+        if ($this->request->getParam('action') == 'authorize') {
             // OAuth spec requires to check OAuth authorize params as a first thing, regardless of whether user is logged in or not.
             // AuthComponent checks user after beforeFilter by default, this is the place to do it.
             try {
@@ -73,8 +73,8 @@ class OAuthController extends AppController
     {
         $this->redirect([
             'action' => 'authorize',
-            '_ext' => $this->request->param('_ext'),
-            '?' => $this->request->query
+            '_ext' => $this->request->getParam('_ext'),
+            '?' => $this->request->getQuery()
         ], 301);
     }
 
@@ -84,8 +84,8 @@ class OAuthController extends AppController
      */
     public function authorize()
     {
-        $clientId = $this->request->query('client_id');
-        $ownerModel = $this->Auth->config('authenticate.all.userModel');
+        $clientId = $this->request->getQuery('client_id');
+        $ownerModel = $this->Auth->getConfig('authenticate.all.userModel');
         $ownerId = $this->Auth->user(Configure::read("OAuthServer.models.{$ownerModel}.id") ?: 'id');
 
         $event = new Event('OAuthServer.beforeAuthorize', $this);
@@ -116,7 +116,7 @@ class OAuthController extends AppController
             })
             ->count();
 
-        if ($currentTokens > 0 || ($this->request->is('post') && $this->request->data('authorization') === 'Approve')) {
+        if ($currentTokens > 0 || ($this->request->is('post') && $this->request->getData('authorization') === 'Approve')) {
             $redirectUri = $this->authCodeGrant->newAuthorizeRequest($ownerModel, $ownerId, $this->authParams);
 
             $event = new Event('OAuthServer.afterAuthorize', $this);
@@ -151,12 +151,33 @@ class OAuthController extends AppController
     {
         try {
             $response = $this->OAuth->Server->issueAccessToken();
-            $this->set($response);
+            $this->set('response', $response);
             $this->set('_serialize', array_keys($response));
         } catch (OAuthException $e) {
             // ignoring $e->getHttpHeaders() for now
             // it only sends WWW-Authenticate header in case of InvalidClientException
             throw new HttpException($e->getMessage(), $e->httpStatusCode, $e);
         }
+    }
+    /**
+     * @return \Cake\Http\Response
+     */
+    public function getProfile()
+    {
+        $this->autoRender = false;
+        if(empty($this->request->getData('access_token')))
+            return $this->redirect('/');
+
+        $profile = $this->OAuth->getProfile();
+        if(empty($profile))
+            return $this->redirect('/');
+
+        return $this->response->withType('json')->withStringBody(json_encode([
+            'id' => $profile['id'],
+            'username' => $profile['username'],
+            'email' => $profile['email'],
+            'first_name' => $profile['first_name'],
+            'last_name' => $profile['last_name'],
+        ]));
     }
 }

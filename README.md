@@ -51,7 +51,7 @@ public function login()
         if ($user) {
             $this->Auth->setUser($user);
             $redirectUri = $this->Auth->redirectUrl();
-            if ($this->request->query['redir'] === 'oauth') {
+            if ($this->request->getQuery('redir') === 'oauth') {
                 $redirectUri = [
                     'plugin' => 'OAuthServer',
                     'controller' => 'OAuth',

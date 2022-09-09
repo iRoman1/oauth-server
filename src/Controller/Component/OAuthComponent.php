@@ -2,9 +2,11 @@
 namespace OAuthServer\Controller\Component;
 
 use Cake\Controller\Component;
+use Cake\Controller\ComponentRegistry;
 use Cake\Core\App;
 use Cake\Network\Exception\NotImplementedException;
 use Cake\Utility\Inflector;
+use OAuthServer\Auth\OAuthAuthenticate;
 use OAuthServer\Traits\GetStorageTrait;
 
 class OAuthComponent extends Component
@@ -50,6 +52,9 @@ class OAuthComponent extends Component
         ],
         'authorizationServer' => [
             'className' => 'League\OAuth2\Server\AuthorizationServer'
+        ],
+        'resourceServer' => [
+            'className' => 'League\OAuth2\Server\ResourceServer'
         ]
     ];
 
@@ -58,7 +63,7 @@ class OAuthComponent extends Component
      */
     protected function _getAuthorizationServer()
     {
-        $serverConfig = $this->config('authorizationServer');
+        $serverConfig = $this->getConfig('authorizationServer');
         $serverClassName = App::className($serverConfig['className']);
 
         return new $serverClassName();
@@ -78,7 +83,7 @@ class OAuthComponent extends Component
         $server->setAuthCodeStorage($this->_getStorage('authCode'));
         $server->setRefreshTokenStorage($this->_getStorage('refreshToken'));
 
-        $supportedGrants = isset($config['supportedGrants']) ? $config['supportedGrants'] : $this->config('supportedGrants');
+        $supportedGrants = isset($config['supportedGrants']) ? $config['supportedGrants'] : $this->getConfig('supportedGrants');
         $supportedGrants = $this->_registry->normalizeArray($supportedGrants);
 
         foreach ($supportedGrants as $properties) {
@@ -96,8 +101,10 @@ class OAuthComponent extends Component
                     $controller = $this->_registry->getController();
                     $controller->Auth->constructAuthenticate();
                     $userfield = $controller->Auth->_config['authenticate']['Form']['fields']['username'];
-                    $controller->request->data[$userfield] = $username;
-                    $controller->request->data['password'] = $password;
+                    $data = $controller->request->getData();
+                    $data[$userfield] = $username;
+                    $data['password'] = $password;
+                    $controller->request = $controller->request->withParsedBody($data);
                     $loginOk = $controller->Auth->identify();
                     if ($loginOk) {
                         return $loginOk['id'];
@@ -117,10 +124,19 @@ class OAuthComponent extends Component
             $server->addGrantType($objGrant);
         }
 
-        if ($this->config('accessTokenTTL')) {
-            $server->setAccessTokenTTL($this->config('accessTokenTTL'));
+        if ($this->getConfig('accessTokenTTL')) {
+            $server->setAccessTokenTTL($this->getConfig('accessTokenTTL'));
         }
 
         $this->Server = $server;
+    }
+    public function getProfile()
+    {
+        $registry = new ComponentRegistry();
+        $server = new OAuthAuthenticate($registry, [
+            'userModel' => 'Users'
+        ]);
+        $controller = $registry->getController();
+        return $server->getUser($controller->request);
     }
 }

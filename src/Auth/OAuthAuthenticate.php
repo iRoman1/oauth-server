@@ -64,13 +64,13 @@ class OAuthAuthenticate extends BaseAuthenticate
     {
         parent::__construct($registry, $config);
 
-        if ($this->config('server')) {
-            $this->Server = $this->config('server');
+        if ($this->getConfig('server')) {
+            $this->Server = $this->getConfig('server');
 
             return;
         }
 
-        $serverConfig = $this->config('resourceServer');
+        $serverConfig = $this->getConfig('resourceServer');
         $serverClassName = App::className($serverConfig['className']);
 
         if (!$serverClassName) {
@@ -125,7 +125,7 @@ class OAuthAuthenticate extends BaseAuthenticate
     public function getUser(Request $request)
     {
         try {
-            $this->Server->isValidRequest(true, $request->query('access_token'));
+            $this->Server->isValidRequest(true, $request->getQuery('access_token'));
         } catch (OAuthException $e) {
             $this->_exception = $e;
 
