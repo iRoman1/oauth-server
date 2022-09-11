@@ -28,7 +28,7 @@ class Client extends Entity
         if (empty($this->parent_model)) {
             return null;
         }
-        $parentTable = TableRegistry::get($this->parent_model);
+        $parentTable = TableRegistry::getTableLocator()->get($this->parent_model);
 
         return $parentTable->get($this->parent_id);
     }

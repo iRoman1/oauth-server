@@ -6,11 +6,11 @@ use Cake\Event\EventManager;
 use Cake\ORM\TableRegistry;
 use Cake\Routing\RouteBuilder;
 use Cake\Routing\Router;
-use Cake\TestSuite\IntegrationTestCase;
+use Cake\TestSuite\TestCase;
 use OAuthServer\Controller\OAuthController;
 use TestApp\Controller\TestAppController;
 
-class OAuthControllerTest extends IntegrationTestCase
+class OAuthControllerTest extends TestCase
 {
     public $fixtures = [
         'plugin.o_auth_server.clients',
@@ -72,7 +72,7 @@ class OAuthControllerTest extends IntegrationTestCase
 
         $this->assertRedirect();
 
-        $sessions = TableRegistry::get('OAuthServer.Sessions');
+        $sessions = TableRegistry::getTableLocator()->get('OAuthServer.Sessions');
         $this->assertTrue($sessions->exists(['owner_id' => 5, 'owner_model' => 'Users']), "Session in database was not correct");
     }
 
@@ -93,7 +93,7 @@ class OAuthControllerTest extends IntegrationTestCase
         $this->assertEquals('AnotherModel', $this->viewVariable('ownerModel'));
         $this->assertEquals(15, $this->viewVariable('ownerId'));
 
-        $sessions = TableRegistry::get('OAuthServer.Sessions');
+        $sessions = TableRegistry::getTableLocator()->get('OAuthServer.Sessions');
         $this->assertTrue($sessions->exists(['owner_id' => 15, 'owner_model' => 'AnotherModel']), "Session in database was not correct");
     }
 

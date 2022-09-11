@@ -23,7 +23,7 @@ class OAuthAuthenticateTest extends TestCase
         $this->auth = new OAuthAuthenticate($this->Collection, [
             'userModel' => 'Users'
         ]);
-        TableRegistry::clear();
+        TableRegistry::getTableLocator()->clear();
         $this->response = $this->getMockBuilder(Response::class)->getMock();
     }
 

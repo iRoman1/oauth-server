@@ -148,7 +148,7 @@ class OAuthAuthenticate extends BaseAuthenticate
             $options['contain'] = $this->_config['contain'];
         }
 
-        $owner = TableRegistry::get($ownerModel)
+        $owner = TableRegistry::getTableLocator()->get($ownerModel)
             ->get($ownerId, $options)
             ->toArray();
 

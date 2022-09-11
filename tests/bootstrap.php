@@ -61,11 +61,8 @@ ConnectionManager::setConfig('test', ['url' => getenv('db_dsn')]);
 Configure::write('OAuthServer.appController', 'TestApp\Controller\TestAppController');
 
 require_once $root . DS . 'config' . DS . 'bootstrap.php';
-
-Plugin::load('OAuth', [
+$this->addPlugin('OAuth', [
     'path' => dirname(dirname(__FILE__)) . DS,
 ]);
-Plugin::load('OAuthServer', ['path' => $root]);
+$this->addPlugin('OAuthServer', ['path' => $root]);
 
-\Cake\Routing\DispatcherFactory::add('Routing');
-\Cake\Routing\DispatcherFactory::add('ControllerFactory');
